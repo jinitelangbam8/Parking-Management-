@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Building, LockOpen, ShieldAlert, Coins, Car, Users, TrendingUp, ArrowUpRight, CheckCircle, AlertOctagon } from 'lucide-react';
+import { Building, LockOpen, ShieldAlert, Coins, Car, Users, TrendingUp, ArrowUpRight, CheckCircle, AlertOctagon, Scan } from 'lucide-react';
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { QRScannerModal } from './QRScannerModal';
 
 export const DashboardAdminView: React.FC = () => {
   const { slots, bookings, vehicles, payments, navigateTo, isDarkMode } = useApp();
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   const stats = useMemo(() => {
     const totalSpaces = slots.length;
@@ -187,6 +189,13 @@ export const DashboardAdminView: React.FC = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2.5">
+            <button
+              onClick={() => setIsScannerOpen(true)}
+              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm cursor-pointer flex items-center gap-1.5 border border-emerald-400/20"
+              id="admin-scan-qr-btn"
+            >
+              <Scan className="w-3.5 h-3.5" /> Scan Booking QR
+            </button>
             <button
               onClick={() => navigateTo('vehicles')}
               className="px-4 py-2 bg-white text-indigo-700 hover:bg-indigo-50 text-xs font-semibold rounded-xl transition-all shadow-sm cursor-pointer"
@@ -606,6 +615,12 @@ export const DashboardAdminView: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Booking QR scanner Gate Terminal */}
+      <QRScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+      />
     </div>
   );
 };

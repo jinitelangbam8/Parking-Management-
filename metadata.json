@@ -1,6 +1,6 @@
 {
   "name": "Smart Parking Management System",
   "description": "An elegant, comprehensive, and responsive parking management platform for admin controls and user booking.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
