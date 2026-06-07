@@ -15,7 +15,7 @@ import { ReportsView } from './components/ReportsView';
 import { ProfileView } from './components/ProfileView';
 import { SettingsView } from './components/SettingsView';
 
-import { Car, ShieldAlert, ArrowRight, Sparkles, LogIn, UserPlus, Users, Key, Monitor, Compass, Eye, ShieldCheck } from 'lucide-react';
+import { Car, ShieldAlert, ArrowRight, Sparkles, LogIn, UserPlus, Users, Key, Monitor, Compass, Eye, ShieldCheck, ExternalLink } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { currentPath, navigateTo, currentUser, login, register, showToast } = useApp();
@@ -365,7 +365,16 @@ const HomeLandingView: React.FC = () => {
           <span className="text-sm font-black tracking-tight">SmartParking Control</span>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          <a
+            href={typeof window !== 'undefined' ? window.location.origin : '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-400/30 text-indigo-400 hover:text-white hover:bg-indigo-500/10 transition-all text-xs font-bold cursor-pointer"
+            id="landing-open-tab-link"
+          >
+            <ExternalLink className="w-3.5 h-3.5" /> <span>Open in New Tab</span>
+          </a>
           <button
             onClick={() => navigateTo('login')}
             className="px-4 py-2 hover:bg-white/5 text-xs font-semibold rounded-lg transition-colors cursor-pointer"

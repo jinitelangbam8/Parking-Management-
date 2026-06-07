@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Menu, Sun, Moon, Volume2, ShieldAlert, Wifi, Clock, HelpCircle, Power } from 'lucide-react';
+import { Menu, Sun, Moon, Volume2, ShieldAlert, Wifi, Clock, HelpCircle, Power, ExternalLink } from 'lucide-react';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -51,6 +51,19 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           <Clock className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
           <span>{time || '00:00:00'}</span>
         </div>
+
+        {/* Real-Time External Launch Tab Link */}
+        <a
+          href={typeof window !== 'undefined' ? window.location.origin : '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/10 text-xs font-bold transition-all shadow-xs cursor-pointer"
+          title="Open application in a new tab for real-time camera simulation features"
+          id="header-open-tab-link"
+        >
+          <ExternalLink className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Open App in New Tab</span>
+        </a>
 
         {/* System Reset Shortcut with warning */}
         <button

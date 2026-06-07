@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Camera, RefreshCw, CheckCircle, AlertTriangle, 
   Search, Upload, CreditCard, Sparkles, AlertOctagon,
-  FolderSync, HelpCircle, ArrowRight, ShieldCheck, Check
+  FolderSync, HelpCircle, ArrowRight, ShieldCheck, Check,
+  ExternalLink
 } from 'lucide-react';
 import jsQR from 'jsqr';
 import { Booking, PaymentMethod } from '../types';
@@ -303,9 +304,20 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose 
                             </h4>
                             <p className="text-xs text-slate-400 leading-snug">
                               {permissionAlert 
-                                ? 'The application iframe is restricted from initializing the device hardware camera. Open application in a new tab or use our instant simulator options below!' 
+                                ? 'The application iframe is restricted from initializing the device hardware camera. Click the link below to open the application in a new tab, or use our instant simulator options below!' 
                                 : 'Unable to lock connection on media device webcam. Connect standard USB video sources or proceed using direct local files.'}
                             </p>
+                            {permissionAlert && (
+                              <a
+                                href={typeof window !== 'undefined' ? window.location.origin : '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-slate-900 border border-indigo-400/30 font-bold text-white text-xs rounded-xl transition-all shadow-sm cursor-pointer mt-2"
+                                id="scanner-open-tab-btn"
+                              >
+                                <ExternalLink className="w-4 h-4" /> Open App in New Tab
+                              </a>
+                            )}
                           </div>
                         </div>
                       )}
