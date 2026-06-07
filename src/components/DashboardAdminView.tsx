@@ -34,6 +34,35 @@ export const DashboardAdminView: React.FC = () => {
     };
   }, [slots, payments, vehicles]);
 
+  // Real-time calculation of zone capacities and alert threshold (>=90%)
+  const zonesCapacity = useMemo(() => {
+    const zonesMap: Record<string, { total: number; occupied: number }> = {};
+    
+    slots.forEach((slot) => {
+      const zoneId = slot.id.split('-')[0] || 'Unknown';
+      if (!zonesMap[zoneId]) {
+        zonesMap[zoneId] = { total: 0, occupied: 0 };
+      }
+      zonesMap[zoneId].total += 1;
+      if (slot.status !== 'Available') {
+        zonesMap[zoneId].occupied += 1;
+      }
+    });
+
+    return Object.entries(zonesMap).map(([zoneId, data]) => {
+      const percent = data.total > 0 ? Math.round((data.occupied / data.total) * 100) : 0;
+      const zoneName = zoneId === 'A' ? 'Zone A (Cars)' : zoneId === 'B' ? 'Zone B (Bikes)' : zoneId === 'T' ? 'Zone T (Trucks)' : `Zone ${zoneId}`;
+      return {
+        id: zoneId,
+        name: zoneName,
+        total: data.total,
+        occupied: data.occupied,
+        percent,
+        isAlertState: percent >= 90
+      };
+    }).sort((a, b) => b.percent - a.percent); // Show highest capacity zones first!
+  }, [slots]);
+
   // 24 Hours Occupancy Forecast Data based on historical bookings & standard usage patterns
   const forecastData = useMemo(() => {
     const data = [];
@@ -245,6 +274,113 @@ export const DashboardAdminView: React.FC = () => {
               ></div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Real-Time Parking Zones & Capacity Alerts */}
+      <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div>
+            <h3 className="text-sm font-bold text-slate-850 dark:text-white uppercase tracking-wider flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+              Real-time Zone Capacities & Alerts (90% Threshold)
+            </h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 leading-snug">
+              Live capacity monitoring by zones. Reaching 90%+ automatically triggers high-level system alerts.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-450 font-bold bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1.5 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Monitor Mode: Active
+          </div>
+        </div>
+
+        {/* High-Alert Emergency Warnings Banner for any 90%+ zone */}
+        {zonesCapacity.some(z => z.isAlertState) ? (
+          <div className="p-4 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 rounded-xl flex items-start gap-3.5 border-l-4 border-l-rose-500">
+            <AlertOctagon className="w-5 h-5 text-rose-550 dark:text-rose-450 shrink-0 mt-0.5 animate-bounce" />
+            <div className="space-y-1">
+              <h4 className="text-xs font-bold text-rose-800 dark:text-rose-200 uppercase tracking-wider">
+                Critical Zone Saturated (&gt;= 90% Capacity)
+              </h4>
+              <p className="text-xs text-rose-600 dark:text-rose-350 leading-relaxed">
+                {zonesCapacity.filter(z => z.isAlertState).map(z => `${z.name} (${z.percent}%)`).join(', ')} exceeded authorized nominal volume! 
+                Admins must redirect new inbound vehicles or checkout exited slots immediately to prevent congestion.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 bg-emerald-50/40 dark:bg-emerald-950/10 border border-emerald-100/50 dark:border-emerald-900/10 rounded-xl flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+            <span className="text-xs text-slate-600 dark:text-slate-350 font-medium">All parking zones running within secure threshold parameters. No high-capacity alerts active.</span>
+          </div>
+        )}
+
+        {/* Zone Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {zonesCapacity.map((zone) => {
+            const availableSlots = zone.total - zone.occupied;
+            // Decide theme colors based on percent
+            let progressColor = 'bg-emerald-500';
+            let cardBorder = 'border-slate-150 dark:border-slate-800';
+            let badgeBg = 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-100/30 dark:border-emerald-900/30';
+            
+            if (zone.isAlertState) {
+              progressColor = 'bg-rose-500';
+              cardBorder = 'border-rose-200 dark:border-rose-900 bg-rose-50/20 dark:bg-rose-950/10 shadow-md shadow-rose-500/5';
+              badgeBg = 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-450 border-rose-200 dark:border-rose-900 font-extrabold animate-pulse';
+            } else if (zone.percent >= 70) {
+              progressColor = 'bg-amber-500';
+              cardBorder = 'border-amber-200 dark:border-amber-900/40 bg-amber-50/10 dark:bg-amber-950/5';
+              badgeBg = 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/30 font-semibold';
+            }
+
+            return (
+              <div 
+                key={zone.id} 
+                className={`p-5 rounded-2xl border ${cardBorder} flex flex-col justify-between h-40 transition-all hover:scale-[1.01]`}
+              >
+                <div>
+                  <div className="flex justify-between items-start gap-2">
+                    <span className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                      {zone.name}
+                    </span>
+                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border ${badgeBg}`}>
+                      {zone.isAlertState ? 'CRITICAL ALERT' : zone.percent >= 70 ? 'MODERATE' : 'OPTIMAL'}
+                    </span>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <div className="flex justify-between items-baseline mb-1">
+                      <span className="text-2xl font-black text-slate-850 dark:text-white leading-none">
+                        {zone.percent}%
+                      </span>
+                      <span className="text-[10px] font-medium text-slate-400">
+                        {zone.occupied} / {zone.total} slots occupied
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 h-2.5 rounded-full overflow-hidden border dark:border-slate-800">
+                      <div 
+                        className={`h-full ${progressColor}`} 
+                        style={{ width: `${zone.percent}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium pt-3 border-t border-slate-100 dark:border-slate-800 mt-auto">
+                  <span>Available: <strong className="text-slate-600 dark:text-slate-200 font-black">{availableSlots} free bays</strong></span>
+                  {zone.isAlertState && (
+                    <span className="text-rose-500 font-bold flex items-center gap-1 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
+                      Congested
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

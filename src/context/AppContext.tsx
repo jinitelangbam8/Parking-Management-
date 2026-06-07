@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { User, ParkingSlot, Booking, Vehicle, Payment, ToastMessage, VehicleType, SlotStatus, PaymentMethod } from '../types';
 import { initialUsers, initialSlots, initialBookings, initialVehicles, initialPayments, generateId } from '../data/mockData';
 
@@ -101,6 +101,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     localStorage.setItem('park_slots', JSON.stringify(slots));
+  }, [slots]);
+
+  // Real-time capacity monitor for Parking Zones to alert admins at >= 90%
+  const alertedZonesRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    if (!slots || slots.length === 0) return;
+
+    const zonesMap: Record<string, { total: number; occupied: number }> = {};
+    
+    slots.forEach((slot) => {
+      const zoneId = slot.id.split('-')[0] || 'Unknown';
+      if (!zonesMap[zoneId]) {
+        zonesMap[zoneId] = { total: 0, occupied: 0 };
+      }
+      zonesMap[zoneId].total += 1;
+      // All statuses except "Available" count as filled/occupied capacity (Occupied, Reserved, Maintenance)
+      if (slot.status !== 'Available') {
+        zonesMap[zoneId].occupied += 1;
+      }
+    });
+
+    const newlyAlerted: string[] = [];
+
+    Object.entries(zonesMap).forEach(([zoneId, stats]) => {
+      const capacityPercent = stats.total > 0 ? (stats.occupied / stats.total) * 100 : 0;
+      
+      if (capacityPercent >= 90) {
+        newlyAlerted.push(zoneId);
+        
+        // Trigger toast system alert if it was not already alerted in order to avoid spamming
+        if (!alertedZonesRef.current.includes(zoneId)) {
+          const zoneName = zoneId === 'A' ? 'Zone A (Cars)' : zoneId === 'B' ? 'Zone B (Bikes)' : zoneId === 'T' ? 'Zone T (Trucks)' : `Zone ${zoneId}`;
+          showToast(
+            `🚨 [SYSTEM ALERT] ${zoneName} has reached ${Math.round(capacityPercent)}% capacity (${stats.occupied}/${stats.total} slots occupied)!`,
+            'error'
+          );
+        }
+      }
+    });
+
+    // Sync alerted list so that dropping below 90% clears the alert state
+    alertedZonesRef.current = newlyAlerted;
   }, [slots]);
 
   useEffect(() => {
