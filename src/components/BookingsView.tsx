@@ -119,9 +119,14 @@ export const BookingsView: React.FC = () => {
                       <td className="py-4 px-6">{b.username}</td>
                       <td className="py-4 px-6 font-semibold tracking-wider uppercase text-slate-900 dark:text-slate-100">{b.vehicleNumber}</td>
                       <td className="py-4 px-6">
-                        <span className="px-2 py-0.5 rounded-sm bg-slate-100 dark:bg-slate-850 text-[9px] font-bold text-slate-500 uppercase tracking-wide">
-                          {b.vehicleType}
-                        </span>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="px-1.5 py-0.5 rounded-sm bg-slate-100 dark:bg-slate-850 text-[9px] font-bold text-slate-500 uppercase tracking-wide w-max">
+                            {b.vehicleType}
+                          </span>
+                          <span className="text-[11px] font-extrabold text-indigo-650 dark:text-indigo-400">
+                            {b.vehicleName || 'Standard'}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-4 px-6 font-extrabold text-indigo-600 dark:text-indigo-400">{b.slotId}</td>
                       <td className="py-4 px-6 font-semibold">${b.estimatedCost} <span className="text-[10px] text-slate-400 font-medium">({b.durationHours} hrs)</span></td>
@@ -203,6 +208,10 @@ export const BookingsView: React.FC = () => {
                 <span className="font-bold text-slate-800 dark:text-slate-200">Spot {activeQRBooking.slotId}</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-slate-400">Vehicle Model:</span>
+                <span className="font-extrabold text-indigo-600 dark:text-indigo-400">{activeQRBooking.vehicleName || 'Standard'}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-slate-400">License Plate:</span>
                 <span className="font-bold text-slate-800 dark:text-slate-200">{activeQRBooking.vehicleNumber}</span>
               </div>
@@ -259,7 +268,7 @@ export const BookingsView: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Vehicle context:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{settlingBooking.vehicleNumber} ({settlingBooking.vehicleType})</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{settlingBooking.vehicleName || 'Standard'} &bull; {settlingBooking.vehicleNumber} ({settlingBooking.vehicleType})</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Duration:</span>

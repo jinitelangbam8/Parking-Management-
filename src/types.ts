@@ -35,6 +35,7 @@ export interface Booking {
   username: string;
   vehicleNumber: string;
   vehicleType: VehicleType;
+  vehicleName?: string; // e.g. "Tesla Model 3" or "Honda Civic"
   startTime: string; // ISO string
   endTime: string;   // ISO string
   status: BookingStatus;
@@ -47,6 +48,7 @@ export interface Vehicle {
   id: string;
   vehicleNumber: string;
   vehicleType: VehicleType;
+  vehicleName?: string; // e.g. "Toyota Prius" or "Yamaha R6"
   ownerName: string;
   entryTime: string; // ISO string
   exitTime?: string; // ISO string

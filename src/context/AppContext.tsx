@@ -28,7 +28,7 @@ interface AppContextProps {
 
   // Live Vehicle Parking
   vehicles: Vehicle[];
-  checkInVehicle: (vehicleNumber: string, vehicleType: VehicleType, ownerName: string, slotId: string) => void;
+  checkInVehicle: (vehicleNumber: string, vehicleType: VehicleType, ownerName: string, slotId: string, vehicleName?: string) => void;
   checkOutVehicle: (vehicleId: string, paymentMethod: PaymentMethod) => void;
 
   // Payments & Invoices
@@ -65,7 +65,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [slots, setSlots] = useState<ParkingSlot[]>(() => {
     const saved = localStorage.getItem('park_slots');
-    return saved ? JSON.parse(saved) : initialSlots;
+    if (!saved) return initialSlots;
+    try {
+      const parsed = JSON.parse(saved) as ParkingSlot[];
+      // Keep existing states, but append newly specified initial database slots automatically
+      const existingIds = new Set(parsed.map((s) => s.id));
+      const newlyAdded = initialSlots.filter((s) => !existingIds.has(s.id));
+      if (newlyAdded.length > 0) {
+        return [...parsed, ...newlyAdded];
+      }
+      return parsed;
+    } catch (e) {
+      return initialSlots;
+    }
   });
 
   const [bookings, setBookings] = useState<Booking[]>(() => {
@@ -372,13 +384,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     vehicleNumber: string,
     vehicleType: VehicleType,
     ownerName: string,
-    slotId: string
+    slotId: string,
+    vehicleName?: string
   ) => {
     const id = generateId('VEH');
     const newVehicle: Vehicle = {
       id,
       vehicleNumber,
       vehicleType,
+      vehicleName: vehicleName || `Standard ${vehicleType}`,
       ownerName,
       entryTime: new Date().toISOString(),
       status: 'parked',

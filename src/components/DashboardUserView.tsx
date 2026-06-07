@@ -9,6 +9,7 @@ export const DashboardUserView: React.FC = () => {
   // Dialog State
   const [selectedSlot, setSelectedSlot] = useState<typeof slots[0] | null>(null);
   const [vehicleNumber, setVehicleNumber] = useState(currentUser?.plateNumber || '');
+  const [vehicleName, setVehicleName] = useState('');
   const [vehicleType, setVehicleType] = useState<'Car' | 'Bike' | 'Truck'>('Car');
   const [startTime, setStartTime] = useState(() => {
     const d = new Date();
@@ -64,6 +65,13 @@ export const DashboardUserView: React.FC = () => {
     setSelectedSlot(slot);
     setVehicleType(slot.vehicleType);
     setVehicleNumber(currentUser?.plateNumber || '');
+    setVehicleName(
+      slot.vehicleType === 'Car'
+        ? 'Tesla Model Y'
+        : slot.vehicleType === 'Bike'
+        ? 'Yamaha MT-15'
+        : 'Volvo Heavy Duty'
+    );
   };
 
   const handleConfirmReservation = (e: React.FormEvent) => {
@@ -87,6 +95,7 @@ export const DashboardUserView: React.FC = () => {
         slotId: selectedSlot.id,
         vehicleNumber: vehicleNumber.toUpperCase(),
         vehicleType: selectedSlot.vehicleType,
+        vehicleName: vehicleName.trim() || `Standard ${selectedSlot.vehicleType}`,
         startTime: start.toISOString(),
         endTime: end.toISOString(),
         durationHours: quote.hours,
@@ -291,6 +300,20 @@ export const DashboardUserView: React.FC = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
+                  Vehicle Brand & Model (e.g. Tesla Model 3)
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Tesla Model Y"
+                  value={vehicleName}
+                  onChange={(e) => setVehicleName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-850 dark:bg-slate-950 dark:text-slate-100 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-hidden"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Entry Estimated</label>
@@ -370,6 +393,10 @@ export const DashboardUserView: React.FC = () => {
               <div className="flex justify-between">
                 <span className="text-slate-400">Coordinates:</span>
                 <span className="font-bold text-slate-800 dark:text-slate-200">Slot {activeTicketBooking.slotId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Vehicle Model:</span>
+                <span className="font-extrabold text-indigo-600 dark:text-indigo-400">{activeTicketBooking.vehicleName || 'Standard Car'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">License Plate:</span>

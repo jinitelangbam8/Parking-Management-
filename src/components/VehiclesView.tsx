@@ -15,6 +15,7 @@ export const VehiclesView: React.FC = () => {
   // Check In dialog state
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [newPlate, setNewPlate] = useState('');
+  const [newVehicleName, setNewVehicleName] = useState('');
   const [newType, setNewType] = useState<VehicleType>('Car');
   const [newOwner, setNewOwner] = useState('');
   const [selectedSlotId, setSelectedSlotId] = useState('');
@@ -70,11 +71,12 @@ export const VehiclesView: React.FC = () => {
       return;
     }
 
-    checkInVehicle(newPlate.toUpperCase(), newType, newOwner, selectedSlotId);
+    checkInVehicle(newPlate.toUpperCase(), newType, newOwner, selectedSlotId, newVehicleName.trim() || `Standard ${newType}`);
     
     // Clear Form
     setNewPlate('');
     setNewOwner('');
+    setNewVehicleName('');
     setSelectedSlotId('');
     setIsCheckInOpen(false);
   };
@@ -207,10 +209,13 @@ export const VehiclesView: React.FC = () => {
                 paginatedVehicles.map((v) => {
                   const isParked = v.status === 'parked';
                   return (
-                    <tr key={v.id} className="text-xs hover:bg-slate-50/40 dark:hover:bg-slate-950/20 transition-all font-medium text-slate-700 dark:text-slate-200">
-                      <td className="py-4 px-6 font-extrabold tracking-wider">{v.vehicleNumber}</td>
+                    <tr key={v.id} className="text-xs hover:bg-slate-50/40 dark:hover:bg-slate-950/20 transition-all font-medium text-slate-700 dark:text-slate-200 font-sans">
                       <td className="py-4 px-6">
-                        <span className="px-2 py-0.5 rounded-sm bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                        <div className="font-extrabold text-slate-900 dark:text-slate-50">{v.vehicleNumber}</div>
+                        <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold mt-0.5">{v.vehicleName || `Standard ${v.vehicleType}`}</div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="px-1.5 py-0.5 rounded-sm bg-slate-100 dark:bg-slate-800 text-[9px] font-bold text-slate-500 uppercase tracking-wide">
                           {v.vehicleType}
                         </span>
                       </td>
@@ -333,6 +338,20 @@ export const VehiclesView: React.FC = () => {
                   placeholder="e.g. Michael Scott"
                   value={newOwner}
                   onChange={(e) => setNewOwner(e.target.value)}
+                  className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-850 dark:bg-slate-950 dark:text-slate-100 focus:outline-hidden font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
+                  Vehicle Brand & Model name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Toyota Corolla / Harley Davidson"
+                  value={newVehicleName}
+                  onChange={(e) => setNewVehicleName(e.target.value)}
                   className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-850 dark:bg-slate-950 dark:text-slate-100 focus:outline-hidden font-semibold"
                 />
               </div>

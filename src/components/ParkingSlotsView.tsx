@@ -4,7 +4,7 @@ import { Calendar, Search, Filter, PlusCircle, PenTool, Trash2, Building, Layers
 import { ParkingSlot, SlotStatus, VehicleType } from '../types';
 
 export const ParkingSlotsView: React.FC = () => {
-  const { slots, addSlot, updateSlot, deleteSlot, currentUser, showToast } = useApp();
+  const { slots, bookings, vehicles, addSlot, updateSlot, deleteSlot, currentUser, showToast } = useApp();
   const isAdmin = currentUser?.role === 'admin';
 
   // State Management
@@ -198,6 +198,24 @@ export const ParkingSlotsView: React.FC = () => {
               dotColor = 'bg-slate-400';
             }
 
+            // Lookup active parked vehicle or active reservation ticket
+            let occupantName = '';
+            let occupantPlate = '';
+
+            if (slot.status === 'Occupied') {
+              const activeVehicle = vehicles.find((v) => v.slotId === slot.id && v.status === 'parked');
+              if (activeVehicle) {
+                occupantName = activeVehicle.vehicleName || 'Standard Car';
+                occupantPlate = activeVehicle.vehicleNumber;
+              }
+            } else if (slot.status === 'Reserved') {
+              const activeBooking = bookings.find((b) => b.slotId === slot.id && b.status === 'active');
+              if (activeBooking) {
+                occupantName = activeBooking.vehicleName || 'Standard Car';
+                occupantPlate = activeBooking.vehicleNumber;
+              }
+            }
+
             return (
               <div
                 key={slot.id}
@@ -210,12 +228,26 @@ export const ParkingSlotsView: React.FC = () => {
                 </div>
 
                 {/* Subdetails content */}
-                <div className="mt-4 mb-3">
-                  <div className="flex items-center gap-1">
-                    <span className={`w-2 h-2 rounded-full ${dotColor}`}></span>
-                    <span className="text-[10px] font-bold tracking-wider uppercase">{slot.status}</span>
+                <div className="mt-3 mb-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <span className={`w-2 h-2 rounded-full ${dotColor}`}></span>
+                      <span className="text-[10px] font-black tracking-wider uppercase">{slot.status}</span>
+                    </div>
+
+                    {occupantName ? (
+                      <div className="mt-2 p-1.5 rounded-xl bg-white/70 dark:bg-slate-950/40 border border-slate-200/40 dark:border-slate-800/40 shadow-xs">
+                        <div className="text-[10px] font-black text-slate-800 dark:text-slate-100 truncate" title={occupantName}>
+                          🚗 {occupantName}
+                        </div>
+                        <div className="text-[9px] font-bold tracking-widest font-mono text-indigo-600 dark:text-indigo-400 mt-0.5 uppercase">
+                          {occupantPlate}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs font-bold mt-1 opacity-80">${slot.hourlyRate}/hr</p>
+                    )}
                   </div>
-                  <p className="text-xs font-semibold mt-1 opacity-80">${slot.hourlyRate}/hr</p>
                 </div>
 
                 {/* Admin context shortcuts */}
