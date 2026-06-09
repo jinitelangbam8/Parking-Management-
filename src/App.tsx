@@ -15,7 +15,7 @@ import { ReportsView } from './components/ReportsView';
 import { ProfileView } from './components/ProfileView';
 import { SettingsView } from './components/SettingsView';
 
-import { Car, ShieldAlert, ArrowRight, Sparkles, LogIn, UserPlus, Users, Key, Monitor, Compass, Eye, ShieldCheck, ExternalLink } from 'lucide-react';
+import { Car, ShieldAlert, ArrowRight, Sparkles, LogIn, UserPlus, Users, Key, Monitor, Compass, Eye, ShieldCheck, ExternalLink, Mail, Send } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { currentPath, navigateTo, currentUser, login, register, showToast } = useApp();
@@ -348,7 +348,20 @@ const AppContent: React.FC = () => {
 
 // Isolated Home Landing View component
 const HomeLandingView: React.FC = () => {
-  const { navigateTo, login } = useApp();
+  const { navigateTo, login, showToast } = useApp();
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      showToast('Please enter a valid email address.', 'error');
+      return;
+    }
+    setSubscribed(true);
+    showToast(`Successfully signed up: ${email}! You will receive live system update notifications.`, 'success');
+    setEmail('');
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-white relative overflow-hidden" id="landing-screen">
@@ -392,11 +405,11 @@ const HomeLandingView: React.FC = () => {
 
       {/* Hero center segment */}
       <main className="flex-1 flex flex-col items-center justify-center text-center p-6 relative z-10 max-w-4xl mx-auto space-y-8 py-16">
-        <div className="inline-flex items-center gap-2 p-1 px-3 border border-white/10 rounded-full text-[10px] uppercase font-bold tracking-widest text-indigo-400 bg-white/5 bg-slate-900/40 animate-fade-in">
+        <div className="inline-flex items-center gap-2 p-1 px-3 border border-white/10 rounded-full text-[10px] uppercase font-bold tracking-widest text-indigo-400 bg-white/5 bg-slate-900/40 animate-fade-in font-sans">
           <Sparkles className="w-3.5 h-3.5" /> High Precision Space Automation
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 font-sans">
           <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight max-w-3xl">
             Space control solutions for <span className="bg-gradient-to-r from-indigo-400 via-indigo-400 to-sky-400 bg-clip-text text-transparent">Smart Parking complexes</span>
           </h1>
@@ -406,7 +419,7 @@ const HomeLandingView: React.FC = () => {
         </div>
 
         {/* Demo Fast Entry portals launchers for evaluation */}
-        <div className="w-full max-w-3xl mt-8 grid grid-cols-1 sm:grid-cols-2 gap-5 pt-8 border-t border-white/5">
+        <div className="w-full max-w-3xl mt-8 grid grid-cols-1 sm:grid-cols-2 gap-5 pt-8 border-t border-white/5 font-sans">
           {/* Admin entry card option */}
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/30 transition-all text-left flex flex-col justify-between group">
             <div>
@@ -450,6 +463,52 @@ const HomeLandingView: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Transparent Glass-Morphism Email Newsletter Component */}
+      <div className="w-full max-w-4xl mx-auto px-6 mb-16 relative z-10 font-sans" id="newsletter-signup-container">
+        <div className="p-6 md:p-8 rounded-3xl bg-white/[0.02] backdrop-blur-md border border-white/10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 hover:border-indigo-500/20 transition-all duration-300">
+          <div className="text-left space-y-1.5 md:max-w-md">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[9px] uppercase font-bold tracking-wider">
+              <Mail className="w-3.5 h-3.5" /> System Dispatch Hub
+            </div>
+            <h3 className="text-lg font-black text-slate-100">Subscribe for System Updates</h3>
+            <p className="text-slate-400 text-[11px] leading-normal font-medium">
+              Join to collect update notifications for system expansions, live QR scanner status alerts, and offline parking space management schedules.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubscribe} className="w-full md:w-auto flex-1 max-w-md">
+            {subscribed ? (
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold rounded-2xl flex items-center gap-2.5 animate-fade-in" id="newsletter-success-notice">
+                <span className="text-base">✓</span> <span>Subscription active! Live update notifications setup complete.</span>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="email"
+                    required
+                    placeholder="name@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-9 pr-4 py-3 bg-slate-950/60 text-white placeholder-slate-500 border border-white/10 rounded-xl text-xs font-semibold focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all"
+                    id="newsletter-email-input"
+                  />
+                  <Mail className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" />
+                </div>
+                <button
+                  type="submit"
+                  className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-white text-xs rounded-xl transition-all cursor-pointer shadow-md shadow-indigo-600/10 flex items-center justify-center gap-1.5 shrink-0"
+                  id="newsletter-submit-btn"
+                >
+                  <span>Notify Me</span>
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
 
       {/* Footer info levels */}
       <footer className="py-6 border-t border-white/5 text-center text-[10px] text-slate-500 uppercase tracking-widest relative z-10 bg-slate-950/20">
